@@ -11,13 +11,30 @@ export default class extends Component {
     }
   }
   componentDidMount() {
-    const md_regex = /\.md$/i;
+    const md_regex = /---[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\.md$/i;
     const url = `https://api.github.com/repos/${this.props.org}/${this.props.repo}/contents/${this.props.path}`
     fetch(url)
       .then(response => response.json())
       .then(data => {
-        const mdFiles = data.filter(f => md_regex.test(f.name)).reverse();
-        mdFiles.forEach(f => f.name = f.name.replace(/\.[^/.]+$/, ""));
+      const now = new Date();
+      const mdFiles = data.filter(f => md_regex.test(f.name))
+        .map(f => {
+          f.name = f.name.replace(/\.[^/.]+$/, "");
+          const [name,datestr] = f.name.split('---');
+          f.name = name;
+          f.date = new Date(datestr);
+          return f;
+        })
+        .filter(f => f.date < now)
+        .sort((a,b) => {
+          if (a.datestr < b.datestr) {
+            return 1;
+          }
+          if (a.datestr > b.datestr) {
+            return -1;
+          }
+          return 0;
+        });
         this.setState({files: mdFiles});
         mdFiles.forEach(f => {
           fetch(f.download_url)
@@ -33,6 +50,9 @@ export default class extends Component {
     if (! this.state.files) {
       return <p>loading</p>
     }
+    if (this.state.files.length === 0) {
+      return <p></p>
+    }
     const c = this.state.currentFile;
     const handleSelect = (eventKey) => this.setState({currentFile:eventKey});
     return <Navbar bg="light">
@@ -45,6 +65,9 @@ export default class extends Component {
   renderFile() {
     if (! this.state.files) {
       return <p>loading</p>
+    }
+    if (this.state.files.length === 0) {
+      return <p></p>
     }
     const c = this.state.currentFile;
     const f = this.state.files[c];

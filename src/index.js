@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import remarkGfm from 'remark-gfm'
 import { Remark } from 'react-remark'
+import imgLinks from '@pondorasti/remark-img-links'
 import { Container, Row, Col, Navbar, Nav, Table } from 'react-bootstrap'
 
 export default class extends Component {
@@ -73,7 +74,10 @@ export default class extends Component {
     const f = this.state.files[c];
     return <div>
       { f.content && <Remark
-        remarkPlugins={[remarkGfm]}
+        remarkPlugins={[
+            remarkGfm,
+            [imgLinks, { absolutePath: `https://github.com/${this.props.org}/${this.props.repo}/raw/main/${this.props.path}/`}]
+        ]}
         rehypeReactOptions={{
           components: {
             table: props => <Table size="sm" striped bordered hover {...props} />

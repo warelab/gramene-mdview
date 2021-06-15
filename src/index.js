@@ -69,7 +69,7 @@ export default class extends Component {
       return <p>loading</p>
     }
     if (this.state.files.length === 0) {
-      return <p></p>
+      return <p>no files found in <code>{`https://github.com/${this.props.org}/${this.props.repo}/${this.props.path}`}</code></p>
     }
     const c = this.state.currentFile;
     const f = this.state.files[c];

@@ -3,7 +3,7 @@ import remarkGfm from 'remark-gfm'
 import { Remark } from 'react-remark'
 import imgLinks from '@pondorasti/remark-img-links'
 import { Container, Row, Col, Navbar, Nav, Table } from 'react-bootstrap'
-import "./mdview.css"
+import '../css/mdview.css'
 
 export default class extends Component {
   constructor(props) {

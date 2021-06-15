@@ -3,6 +3,7 @@ import remarkGfm from 'remark-gfm'
 import { Remark } from 'react-remark'
 import imgLinks from '@pondorasti/remark-img-links'
 import { Container, Row, Col, Navbar, Nav, Table } from 'react-bootstrap'
+import "./mdview.css"
 
 export default class extends Component {
   constructor(props) {
@@ -72,7 +73,7 @@ export default class extends Component {
     }
     const c = this.state.currentFile;
     const f = this.state.files[c];
-    return <div>
+    return <div className='mdview'>
       { f.content && <Remark
         remarkPlugins={[
             remarkGfm,
@@ -88,7 +89,7 @@ export default class extends Component {
     </div>
   }
   render() {
-    return <Container>
+    return <Container fluid>
       <Row>
         <Col sm={3}>{ this.renderFileList()}</Col>
         <Col sm={9}>{ this.renderFile() }</Col>

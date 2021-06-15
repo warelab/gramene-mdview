@@ -10,8 +10,8 @@ class Demo extends Component {
       <Example
         org='warelab'
         repo='release-notes'
-        path='grapevine-genomes'
-        heading='Releases'
+        path='sorghum-guides'
+        heading='Guides'
       />
     </div>
   }

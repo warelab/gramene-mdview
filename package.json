@@ -27,6 +27,7 @@
     "react-remark": "^2.0.3",
     "rehype-katex": "^4.0.0",
     "remark-gfm": "^1.0.0",
+    "remark-heading-id": "^1.0.0",
     "remark-math": "^4.0.0"
   },
   "peerDependencies": {

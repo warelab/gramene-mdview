@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import remarkGfm from 'remark-gfm'
 import { Remark } from 'react-remark'
+import remarkHeading from 'remark-heading-id'
 import imgLinks from '@pondorasti/remark-img-links'
 import { Container, Row, Col, Navbar, Nav, Table } from 'react-bootstrap'
 import '../css/mdview.css'
@@ -77,6 +78,7 @@ export default class extends Component {
       { f.content && <Remark
         remarkPlugins={[
             remarkGfm,
+            remarkHeading,
             [imgLinks, { absolutePath: `https://github.com/${this.props.org}/${this.props.repo}/raw/main/${this.props.path}/`}]
         ]}
         rehypeReactOptions={{

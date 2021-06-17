@@ -29,10 +29,10 @@ export default class extends Component {
         })
         .filter(f => f.date < now)
         .sort((a,b) => {
-          if (a.datestr < b.datestr) {
+          if (a.date < b.date) {
             return 1;
           }
-          if (a.datestr > b.datestr) {
+          if (a.date > b.date) {
             return -1;
           }
           return 0;

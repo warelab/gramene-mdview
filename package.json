@@ -30,9 +30,6 @@
     "remark-heading-id": "^1.0.0",
     "remark-math": "^4.0.0"
   },
-  "peerDependencies": {
-    "react": "16.x"
-  },
   "devDependencies": {
     "nwb": "0.23.x",
     "react": "^17.0.2",

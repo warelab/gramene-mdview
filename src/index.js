@@ -51,7 +51,7 @@ export default class extends Component {
   }
   renderFileList() {
     if (! this.state.files) {
-      return <p>loading</p>
+      return <p></p>
     }
     if (this.state.files.length === 0) {
       return <p></p>
@@ -67,7 +67,7 @@ export default class extends Component {
   }
   renderFile() {
     if (! this.state.files) {
-      return <p>loading</p>
+      return <p>{this.props.ifEmpty || `No matching files found in ${this.props.org}/${this.props.repo}/${this.props.path}`}</p>
     }
     if (this.state.files.length === 0) {
       return <p>no files found in <code>{`https://github.com/${this.props.org}/${this.props.repo}/${this.props.path}`}</code></p>

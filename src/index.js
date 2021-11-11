@@ -19,7 +19,7 @@ export default class extends Component {
     fetch(url)
       .then(response => response.json())
       .then(data => {
-      const now = new Date();
+      const now = this.props.date ? new Date(this.props.date) : new Date();
       const mdFiles = data.filter(f => md_regex.test(f.name))
         .map(f => {
           f.name = f.name.replace(/\.[^/.]+$/, "");

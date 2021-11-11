@@ -10,9 +10,10 @@ class Demo extends Component {
       <Example
         org='warelab'
         repo='release-notes'
-        path='oryza-guides'
-        heading='Guides'
+        path='sorghum'
+        heading='Release Notes'
         ifEmpty='A user guide is in development'
+        date='11-01-2021'
       />
     </div>
   }

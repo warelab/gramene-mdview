@@ -13,7 +13,7 @@ class Demo extends Component {
         path='sorghum'
         heading='Release Notes'
         ifEmpty='A user guide is in development'
-        date='11-01-2021'
+        date='2021-11-18'
       />
     </div>
   }

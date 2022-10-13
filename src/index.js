@@ -1,31 +1,49 @@
-import React, { Component } from 'react'
+import React, {Component} from 'react'
 import remarkGfm from 'remark-gfm'
-import { Remark } from 'react-remark'
+import {Remark} from 'react-remark'
 import remarkHeading from 'remark-heading-id'
 import imgLinks from '@pondorasti/remark-img-links'
-import { Container, Row, Col, Navbar, Nav, Table } from 'react-bootstrap'
-import '../css/mdview.css'
+import {Table} from 'react-bootstrap'
+import SidebarMenu from 'react-bootstrap-sidebar-menu'
+import "./styles.css"
+import "./mdview.css"
 
+const find_and_scroll = (eventKey) => {
+  if (eventKey){
+    const el = document.getElementById(`mdView-${eventKey}`)
+    if (el) {
+      el.scrollIntoView({behavior: 'smooth'});
+      const nextURL = `${window.location.origin}${window.location.pathname}?section=${eventKey}`;
+      const nextTitle = `${window.location.host} section ${eventKey}`;
+      const nextState = { additionalInformation: 'updated the URL based on click' };
+      window.history.pushState(nextState, nextTitle, nextURL);
+      return true;
+    }
+  }
+  return false;
+}
 export default class extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      currentFile: 0
+      files:[],
+      content:{}
     }
   }
-  componentDidMount() {
-    const md_regex = /---[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\.md$/i;
-    const url = `https://api.github.com/repos/${this.props.org}/${this.props.repo}/contents/${this.props.path}`
-    fetch(url)
+  getFiles(path) {
+    const md_regex = /---[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/i; //\.md$/i;
+    const url = `https://api.github.com/repos/${this.props.org}/${this.props.repo}/contents/${path}`;
+    const now = this.props.date ? new Date(this.props.date) : new Date();
+    return fetch(url)
       .then(response => response.json())
-      .then(data => {
-      const now = this.props.date ? new Date(this.props.date) : new Date();
-      const mdFiles = data.filter(f => md_regex.test(f.name))
+      .then(data => data.filter(f => md_regex.test(f.name))
         .map(f => {
           f.name = f.name.replace(/\.[^/.]+$/, "");
           const [name,datestr] = f.name.split('---');
           f.name = name;
           f.date = new Date(datestr);
+          f.fetched = false;
+          f.parent = path;
           return f;
         })
         .filter(f => f.date < now)
@@ -37,65 +55,148 @@ export default class extends Component {
             return -1;
           }
           return 0;
-        });
-        this.setState({files: mdFiles});
-        mdFiles.forEach(f => {
-          fetch(f.download_url)
-            .then(response => response.text())
-            .then(content => {
-              f.content = content;
-              this.setState({files: mdFiles})
-            })
         })
-      });
+      )
   }
-  renderFileList() {
-    if (! this.state.files) {
-      return <p></p>
-    }
-    if (this.state.files.length === 0) {
-      return <p></p>
-    }
-    const c = this.state.currentFile;
-    const handleSelect = (eventKey) => this.setState({currentFile:eventKey});
-    return <Navbar bg="light">
-      <Nav className="flex-column" activeKey={c} onSelect={handleSelect}>
-        <Nav.Item><h5>{this.props.heading || 'Files'}</h5></Nav.Item>
-        { this.state.files.map((f,i) => <Nav.Link key={i} eventKey={i}>{f.name}</Nav.Link>) }
-      </Nav>
-    </Navbar>
-  }
-  renderFile() {
-    if (! this.state.files) {
-      return <p>{this.props.ifEmpty || `No matching files found in ${this.props.org}/${this.props.repo}/${this.props.path}`}</p>
-    }
-    if (this.state.files.length === 0) {
-      return <p>no files found in <code>{`https://github.com/${this.props.org}/${this.props.repo}/${this.props.path}`}</code></p>
-    }
-    const c = this.state.currentFile;
-    const f = this.state.files[c];
-    return <div className='mdview'>
-      { f.content && <Remark
-        remarkPlugins={[
-            remarkGfm,
-            remarkHeading,
-            [imgLinks, { absolutePath: `https://github.com/${this.props.org}/${this.props.repo}/raw/main/${this.props.path}/`}]
-        ]}
-        rehypeReactOptions={{
-          components: {
-            table: props => <Table size="sm" striped bordered hover {...props} />
-          }
-        }}
-      >{f.content}</Remark>
+  getContent() {
+    const files = this.state.files;
+    let fetching = false;
+    files.forEach(f => {
+      if (f.download_url && !f.fetched && !this.state.content.hasOwnProperty(f.sha)) {
+        fetching = true;
+        f.fetched = true;
+        fetch(f.download_url)
+          .then(response => response.text())
+          .then(text => {
+            let content = this.state.content;
+            if (!content.hasOwnProperty(f.sha)) {
+              content[f.sha] = text;
+              this.setState({content})
+            }
+          })
       }
-    </div>
+      if (f.type === "dir" && !f.fetched) {
+        fetching = true;
+        f.fetched = true;
+        this.getFiles(f.path).then(children => {
+          if (children) {
+            const files = this.state.files.concat(children)
+            this.setState({files})
+          }
+        })
+      }
+    })
+    if (fetching) {
+      this.setState({files})
+    }
+  }
+  componentDidMount() {
+    const queryString = window.location.search;
+    const params = new URLSearchParams(queryString);
+    const section = params.get('section');
+    this.getFiles(this.props.path).then(files => {
+      this.setState({files, currentPos: section})
+    });
+  }
+  componentDidUpdate() {
+    console.log('update',this.state);
+    this.getContent()
+    find_and_scroll(this.state.currentPos);
+  }
+  renderItems(path,prefix) {
+    return <SidebarMenu.Nav> {
+      this.state.files.filter(f => f.parent === path).map((f, i) => {
+        const fileId = prefix.concat([i+1]).join('.');
+        if (f.type === 'file') {
+          return <SidebarMenu.Nav.Link eventKey={fileId} key={i}>
+            <span style={{paddingLeft: `${prefix.length * 35}px`}}>
+              <SidebarMenu.Nav.Icon>&bull;</SidebarMenu.Nav.Icon>
+              <SidebarMenu.Nav.Title>{f.name}</SidebarMenu.Nav.Title>
+            </span>
+          </SidebarMenu.Nav.Link>
+        }
+        if (f.type === 'dir') {
+          return <SidebarMenu.Sub eventKey={fileId} key={i} defaultExpanded={true}>
+            <SidebarMenu.Sub.Toggle>
+              <SidebarMenu.Nav.Icon />
+              <SidebarMenu.Nav.Title>{f.name}</SidebarMenu.Nav.Title>
+            </SidebarMenu.Sub.Toggle>
+            <SidebarMenu.Sub.Collapse>
+              {this.renderItems(f.path, prefix.concat([i+1]))}
+            </SidebarMenu.Sub.Collapse>
+          </SidebarMenu.Sub>
+        }
+      })
+    }
+    </SidebarMenu.Nav>
+  }
+  renderContent(path, prefix) {
+    return this.state.files.filter(f => f.parent === path).map((f,i) => {
+        const fileId = prefix.concat([i+1]).join('.')
+        if (f.type === 'file') {
+          const content = this.state.content[f.sha]
+          return <div><h5 className="mdview-body-section" id={`mdView-${fileId}`}>{f.name}</h5> {
+            content && <Remark
+              ref={this.docRef}
+              remarkPlugins={[
+                remarkGfm,
+                remarkHeading,
+                [imgLinks, { absolutePath: `https://github.com/${this.props.org}/${this.props.repo}/raw/main/${this.props.path}/`}]
+              ]}
+              rehypeReactOptions={{
+                components: {
+                  table: props => <Table size="sm" striped bordered hover {...props} />
+                }
+              }}
+            >{content}</Remark>
+          }</div>
+        }
+        else {
+          return <div>
+            <h4 className="mdview-body-section" id={fileId}>{f.name}</h4>
+            {this.renderContent(f.path, prefix.concat([i+1]))}
+          </div>
+        }
+      })
+  }
+  renderSidebar() {
+    return <SidebarMenu
+      variant="dark"
+      bg="dark"
+      expand="lg"
+      hide="md"
+      onSelect={eventKey => {
+        if (find_and_scroll(eventKey) && eventKey !== this.state.currentPos)
+          this.setState({currentPos: eventKey})
+      }}
+    >
+      <SidebarMenu.Collapse>
+        <SidebarMenu.Header>
+          <SidebarMenu.Brand title={this.props.heading || 'Docs'}>{this.props.heading || 'Docs'}</SidebarMenu.Brand>
+          {/*<SidebarMenu.Toggle />*/}
+        </SidebarMenu.Header>
+        <SidebarMenu.Body>
+          {this.renderItems(this.props.path,[])}
+        </SidebarMenu.Body>
+      </SidebarMenu.Collapse>
+    </SidebarMenu>
+  }
+  sidebar() {
+    return <section className="mdview-sidebar">
+      {this.renderSidebar()}
+    </section>
+  }
+  content() {
+    return <section className="mdview-body">
+      <div className="mdview-body-wrapper">
+        {this.renderContent(this.props.path, [])}
+      </div>
+    </section>
   }
   render() {
-    return <Container fluid>
-      <Row>
-        <Col sm={3}>{ this.renderFileList()}</Col>
-        <Col sm={9}>{ this.renderFile() }</Col>
-      </Row>
-    </Container>
+    return <div className="mdview-container">
+      {this.sidebar()}
+      {this.content()}
+    </div>
   }
 }

@@ -5,8 +5,8 @@ import remarkHeading from 'remark-heading-id'
 import imgLinks from '@pondorasti/remark-img-links'
 import {Table} from 'react-bootstrap'
 import SidebarMenu from 'react-bootstrap-sidebar-menu'
-import "./styles.css"
-import "./mdview.css"
+import "../css/styles.css"
+import "../css/mdview.css"
 
 const find_and_scroll = (eventKey) => {
   if (eventKey){

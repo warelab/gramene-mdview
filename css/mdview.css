@@ -1,4 +1,43 @@
-.mdview img {
-    max-width: 100%;
-    height: auto;
+.mdview-container {
+    display: grid;
+    grid-template-rows: 20px calc(100vh - 20px);
+    grid-template-columns: auto auto;
+    grid-template-areas:
+        'mdv-sidebar mdv-header'
+        'mdv-sidebar mdv-body';
+}
+
+.mdview-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-area: mdv-header;
+}
+
+.mdview-body {
+    grid-area: mdv-body;
+    overflow: auto;
+}
+.mdview-body-section {
+    background: linear-gradient(45deg, black, transparent);
+    padding: 5px;
+    color: ghostwhite;
+}
+.mdview-body-wrapper {
+    margin: auto;
+    padding-left: 10px;
+}
+
+.mdview-sidebar {
+    grid-area: mdv-sidebar;
+    height: 100vh;
+    padding: 0px;
+    background-color: #212529;
+}
+
+.mdview-sidebar-data {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    border-top: 2px solid #012025
 }

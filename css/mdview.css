@@ -1,9 +1,8 @@
 .mdview-container {
     display: grid;
-    grid-template-rows: 20px calc(100vh - 20px);
+    grid-template-rows: calc(100vh - 20px);
     grid-template-columns: auto auto;
     grid-template-areas:
-        'mdv-sidebar mdv-header'
         'mdv-sidebar mdv-body';
 }
 

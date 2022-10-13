@@ -182,7 +182,7 @@ export default class extends Component {
     </SidebarMenu>
   }
   sidebar() {
-    return <section className="mdview-sidebar">
+    return <section className="mdview-sidebar" style={{height: `calc(100vh - ${this.props.offset || 0}px)`}}>
       {this.renderSidebar()}
     </section>
   }
@@ -194,7 +194,7 @@ export default class extends Component {
     </section>
   }
   render() {
-    return <div className="mdview-container">
+    return <div className="mdview-container" style={{gridTemplateRows: `calc(100vh - ${this.props.offset || 0}px)`}}>
       {this.sidebar()}
       {this.content()}
     </div>

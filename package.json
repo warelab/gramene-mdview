@@ -1,6 +1,6 @@
 {
   "name": "gramene-mdview",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "mdview React component",
   "main": "lib/index.js",
   "module": "es/index.js",

@@ -95,6 +95,9 @@ export default class extends Component {
     const queryString = window.location.search;
     const params = new URLSearchParams(queryString);
     const section = params.get('section');
+    if (section) {
+      setTimeout(() => find_and_scroll(this.state.currentPos), 1000)
+    }
     this.getFiles(this.props.path).then(files => {
       this.setState({files, currentPos: section})
     });
@@ -102,7 +105,7 @@ export default class extends Component {
   componentDidUpdate() {
     console.log('update',this.state);
     this.getContent()
-    find_and_scroll(this.state.currentPos);
+    // find_and_scroll(this.state.currentPos);
   }
   renderItems(path,prefix) {
     return <SidebarMenu.Nav> {

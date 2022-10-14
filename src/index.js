@@ -44,6 +44,7 @@ export default class extends Component {
           f.date = new Date(datestr);
           f.fetched = false;
           f.parent = path;
+          f.id = f.path.replace(/.*?\//,'').replace(/---\d+-\d+-\d+/g,'').replace(/\.md$/,'')
           return f;
         })
         .filter(f => f.date < now)
@@ -108,7 +109,7 @@ export default class extends Component {
       this.state.files.filter(f => f.parent === path).map((f, i) => {
         const fileId = prefix.concat([i+1]).join('.');
         if (f.type === 'file') {
-          return <SidebarMenu.Nav.Link eventKey={fileId} key={i}>
+          return <SidebarMenu.Nav.Link eventKey={f.id} key={i}>
             <span style={{paddingLeft: `${prefix.length * 35}px`}}>
               <SidebarMenu.Nav.Icon>&bull;</SidebarMenu.Nav.Icon>
               <SidebarMenu.Nav.Title>{f.name}</SidebarMenu.Nav.Title>
@@ -116,7 +117,7 @@ export default class extends Component {
           </SidebarMenu.Nav.Link>
         }
         if (f.type === 'dir') {
-          return <SidebarMenu.Sub eventKey={fileId} key={i} defaultExpanded={true}>
+          return <SidebarMenu.Sub eventKey={f.id} key={i} defaultExpanded={true}>
             <SidebarMenu.Sub.Toggle>
               <SidebarMenu.Nav.Icon />
               <SidebarMenu.Nav.Title>{f.name}</SidebarMenu.Nav.Title>
@@ -135,7 +136,7 @@ export default class extends Component {
         const fileId = prefix.concat([i+1]).join('.')
         if (f.type === 'file') {
           const content = this.state.content[f.sha]
-          return <div><h5 className="mdview-body-section" id={`mdView-${fileId}`}>{f.name}</h5> {
+          return <div><h5 className="mdview-body-section" id={`mdView-${f.id}`}>{f.name}</h5> {
             content && <Remark
               ref={this.docRef}
               remarkPlugins={[
@@ -153,7 +154,7 @@ export default class extends Component {
         }
         else {
           return <div>
-            <h4 className="mdview-body-section" id={fileId}>{f.name}</h4>
+            <h4 className="mdview-body-section" id={f.id}>{f.name}</h4>
             {this.renderContent(f.path, prefix.concat([i+1]))}
           </div>
         }

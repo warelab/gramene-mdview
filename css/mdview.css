@@ -17,6 +17,7 @@
     grid-area: mdv-body;
     overflow: auto;
 }
+.mdview-body img { max-width: 90%; display: block; }
 .mdview-body-section {
     background: linear-gradient(45deg, black, transparent);
     padding: 5px;

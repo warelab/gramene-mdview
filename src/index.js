@@ -27,7 +27,9 @@ export default class extends Component {
     super(props);
     this.state = {
       files:[],
-      content:{}
+      content:{},
+      loading:0,
+      started: Date.now()
     }
   }
   getFiles(path) {
@@ -61,10 +63,10 @@ export default class extends Component {
   }
   getContent() {
     const files = this.state.files;
-    let fetching = false;
+    let n_to_load = 0;
     files.forEach(f => {
       if (f.download_url && !f.fetched && !this.state.content.hasOwnProperty(f.sha)) {
-        fetching = true;
+        n_to_load++;
         f.fetched = true;
         fetch(f.download_url)
           .then(response => response.text())
@@ -72,22 +74,21 @@ export default class extends Component {
             let content = this.state.content;
             if (!content.hasOwnProperty(f.sha)) {
               content[f.sha] = text;
-              this.setState({content})
+              this.setState({content, loading: this.state.loading - 1})
             }
           })
       }
       if (f.type === "dir" && !f.fetched) {
-        fetching = true;
         f.fetched = true;
         this.getFiles(f.path).then(children => {
           if (children) {
             const files = this.state.files.concat(children)
-            this.setState({files})
+            this.setState({files, loading: this.state.loading + children.length - 1})
           }
         })
       }
     })
-    if (fetching) {
+    if (n_to_load > 0) {
       this.setState({files})
     }
   }
@@ -95,17 +96,18 @@ export default class extends Component {
     const queryString = window.location.search;
     const params = new URLSearchParams(queryString);
     const section = params.get('section');
-    if (section) {
-      setTimeout(() => find_and_scroll(this.state.currentPos), 1000)
-    }
     this.getFiles(this.props.path).then(files => {
-      this.setState({files, currentPos: section})
+      this.setState({files, currentPos: section, loading: files.length})
     });
   }
   componentDidUpdate() {
-    console.log('update',this.state);
     this.getContent()
-    // find_and_scroll(this.state.currentPos);
+    if (this.state.loading === 0 && this.state.currentPos) {
+      // give the page a moment to layout before scrolling
+      const load_time = Date.now() - this.state.started;
+      setTimeout(() => find_and_scroll(this.state.currentPos), 2*load_time)
+      this.setState({loading: -1})
+    }
   }
   renderItems(path,prefix) {
     return <SidebarMenu.Nav> {

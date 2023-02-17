@@ -40,7 +40,7 @@ export default class extends Component {
       .then(response => response.json())
       .then(data => data.filter(f => md_regex.test(f.name))
         .map(f => {
-          f.name = f.name.replace(/\.[^/.]+$/, "");
+          f.name = f.name.replace(/\.md$/, "");
           const [name,datestr] = f.name.split('---');
           f.name = name;
           f.date = new Date(datestr);
@@ -75,6 +75,9 @@ export default class extends Component {
             if (!content.hasOwnProperty(f.sha)) {
               content[f.sha] = text;
               this.setState({content, loading: this.state.loading - 1})
+            }
+            else {
+              console.log(f.sha,'already loaded')
             }
           })
       }

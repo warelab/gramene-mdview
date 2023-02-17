@@ -8,7 +8,7 @@ class Demo extends Component {
     return <Example
         org='warelab'
         repo='release-notes'
-        path='test'
+        path='oryza_v2'
         heading='Tutorials'
         ifEmpty='A user guide is in development'
         date='2022-11-18'
